@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 const Home = () => {
   const [yweet, setYweet] = useState("");
   const [yweets, setYweets] = useState([]);
-  const getNweets = async () => {
+  const getYweets = async () => {
     setYweets([]);
     const q = fData.query(fData.collection(fData.getFirestore(), "yweets"));
     const querySnapshot = await fData.getDocs(q);
@@ -17,7 +17,7 @@ const Home = () => {
     });
   };
   useEffect(() => {
-    getNweets();
+    getYweets();
     console.log(yweets);
   }, []);
   const onSubmit = async (event) => {
