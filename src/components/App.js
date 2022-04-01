@@ -13,6 +13,7 @@ function App() {
         setIsLoggedIn(false);
       }
       setInit(true);
+      console.log(user);
     });
   });
   return (
