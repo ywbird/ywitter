@@ -1,8 +1,25 @@
 import { fData } from "fbase";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const Home = () => {
   const [yweet, setYweet] = useState("");
+  const [yweets, setYweets] = useState([]);
+  const getNweets = async () => {
+    setYweets([]);
+    const q = fData.query(fData.collection(fData.getFirestore(), "yweets"));
+    const querySnapshot = await fData.getDocs(q);
+    querySnapshot.forEach((doc) => {
+      const nweetObj = {
+        ...doc.data(),
+        id: doc.id,
+      };
+      setYweets((prev) => [nweetObj, ...prev]);
+    });
+  };
+  useEffect(() => {
+    getNweets();
+    console.log(yweets);
+  }, []);
   const onSubmit = async (event) => {
     event.preventDefault();
     try {
@@ -37,6 +54,11 @@ const Home = () => {
         />
         <input type="submit" value="Yweet" />
       </form>
+      <div>
+        {yweets.map((e) => (
+          <h4 key={e.id}>{e.content}</h4>
+        ))}
+      </div>
     </div>
   );
 };
