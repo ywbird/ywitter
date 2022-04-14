@@ -1,7 +1,8 @@
+import Yweet from "components/Yweet";
 import { fData } from "fbase";
 import React, { useEffect, useState } from "react";
 
-const Home = () => {
+const Home = ({ userObj }) => {
   const [yweet, setYweet] = useState("");
   const [yweets, setYweets] = useState([]);
   const getYweets = async () => {
@@ -18,7 +19,25 @@ const Home = () => {
   };
   useEffect(() => {
     getYweets();
-    console.log(yweets);
+    const q = fData.query(
+      fData.collection(fData.getFirestore(), "yweets"),
+      // where('text', '==', 'hehe') // where뿐만아니라 각종 조건 이 영역에 때려부우면 됨
+      fData.orderBy("createdAt")
+    );
+    const unsubscribe = fData.onSnapshot(q, (querySnapshot) => {
+      const newArray = querySnapshot.docs.map((doc) => {
+        return {
+          id: doc.id,
+          ...doc.data(),
+        };
+      });
+      setYweets(newArray);
+      console.log("Current tweets in CA: ", newArray);
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
   const onSubmit = async (event) => {
     event.preventDefault();
@@ -28,6 +47,7 @@ const Home = () => {
         {
           content: yweet,
           createdAt: Date.now(),
+          creatorId: userObj.uid,
         }
       );
       console.log("Document written with ID: ", docRef.id);
@@ -56,7 +76,11 @@ const Home = () => {
       </form>
       <div>
         {yweets.map((e) => (
-          <h4 key={e.id}>{e.content}</h4>
+          <Yweet
+            key={e.id}
+            yweetObj={e}
+            isOwner={e.creatorId === userObj.uid}
+          />
         ))}
       </div>
     </div>
