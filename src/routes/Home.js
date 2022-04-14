@@ -32,7 +32,6 @@ const Home = ({ userObj }) => {
         };
       });
       setYweets(newArray);
-      console.log("Current tweets in CA: ", newArray);
     });
 
     return () => {
