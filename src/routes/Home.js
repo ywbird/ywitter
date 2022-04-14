@@ -47,6 +47,7 @@ const Home = ({ userObj }) => {
           content: yweet,
           createdAt: Date.now(),
           creatorId: userObj.uid,
+          comments: [],
         }
       );
       console.log("Document written with ID: ", docRef.id);
@@ -75,11 +76,7 @@ const Home = ({ userObj }) => {
       </form>
       <div>
         {yweets.map((e) => (
-          <Yweet
-            key={e.id}
-            yweetObj={e}
-            isOwner={e.creatorId === userObj.uid}
-          />
+          <Yweet key={e.id} yweetObj={e} userObj={userObj} />
         ))}
       </div>
     </div>
