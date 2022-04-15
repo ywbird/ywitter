@@ -1,4 +1,4 @@
-import { fData } from "fbase";
+import { fData, fStorage } from "fbase";
 import Comment from "./Comment";
 import React, { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -16,6 +16,9 @@ const Yweet = ({ yweetObj, userObj }) => {
     const ok = window.confirm("Are you sure to delete this yweet?");
     if (ok) {
       await fData.deleteDoc(YweetTextRef);
+      await fStorage.deleteObject(
+        fStorage.ref(fStorage.getStorage(), yweetObj.fileUrl)
+      );
     }
   };
   const toggleEditing = () => setEditing((prev) => !prev);
@@ -73,6 +76,9 @@ const Yweet = ({ yweetObj, userObj }) => {
       ) : (
         <>
           <h4>{yweetObj.content}</h4>
+          {yweetObj.fileUrl && (
+            <img src={yweetObj.fileUrl} alt="File" width="50px" />
+          )}
           {yweetObj.creatorId === userObj.uid && (
             <>
               <button onClick={onDeleteClick}>Delete</button>

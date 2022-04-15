@@ -1,10 +1,13 @@
 import Yweet from "components/Yweet";
-import { fData } from "fbase";
-import React, { useEffect, useState } from "react";
+import { fData, fStorage } from "fbase";
+import React, { useEffect, useRef, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 const Home = ({ userObj }) => {
   const [yweet, setYweet] = useState("");
   const [yweets, setYweets] = useState([]);
+  const [file, setFile] = useState("");
+  const fileInput = useRef();
   const getYweets = async () => {
     setYweets([]);
     const q = fData.query(fData.collection(fData.getFirestore(), "yweets"));
@@ -40,18 +43,30 @@ const Home = ({ userObj }) => {
   }, []);
   const onSubmit = async (event) => {
     event.preventDefault();
-    try {
-      const docRef = await fData.addDoc(
-        fData.collection(fData.getFirestore(), "yweets"),
-        {
-          content: yweet,
-          createdAt: Date.now(),
-          creatorId: userObj.uid,
-          comments: [],
-        }
+    let fileUrl;
+    if (file !== "") {
+      const fileRef = fStorage.ref(
+        fStorage.getStorage(),
+        `${userObj.uid}/${uuidv4()}`
       );
-      console.log("Document written with ID: ", docRef.id);
+      const response = await fStorage.uploadString(fileRef, file, "data_url");
+      fileUrl = await fStorage.getDownloadURL(response.ref);
+    }
+    const yweetObj = {
+      content: yweet,
+      createdAt: Date.now(),
+      creatorId: userObj.uid,
+      comments: [],
+      fileUrl,
+    };
+    try {
+      await fData.addDoc(
+        fData.collection(fData.getFirestore(), "yweets"),
+        yweetObj
+      );
+      // console.log("Document written with ID: ", docRef.id);
       setYweet("");
+      setFile("");
     } catch (error) {
       console.error("Error adding document: ", error);
     }
@@ -63,6 +78,24 @@ const Home = ({ userObj }) => {
 
     setYweet((prev) => (prev = value));
   };
+  const onFileChange = (event) => {
+    const {
+      target: { files },
+    } = event;
+    const theFile = files[0];
+    const reader = new FileReader();
+    reader.onloadend = (event) => {
+      const {
+        currentTarget: { result },
+      } = event;
+      setFile(result);
+    };
+    reader.readAsDataURL(theFile);
+  };
+  const onClearFile = () => {
+    setFile("");
+    fileInput.current.value = "";
+  };
   return (
     <div>
       <form onSubmit={onSubmit}>
@@ -71,8 +104,21 @@ const Home = ({ userObj }) => {
           value={yweet}
           type="text"
           placeholder="What's on your mind?"
+          required
+        />
+        <input
+          type="file"
+          accept="image/*"
+          onChange={onFileChange}
+          ref={fileInput}
         />
         <input type="submit" value="Yweet" />
+        {file && (
+          <div>
+            <img src={file} alt="File" width="50px" />
+            <button onClick={onClearFile}>Clear</button>
+          </div>
+        )}
       </form>
       <div>
         {yweets.map((e) => (
