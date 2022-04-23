@@ -12,13 +12,14 @@ const Yweet = ({ yweetObj, userObj }) => {
     "yweets",
     `${yweetObj.id}`
   );
+  const fileRef = fStorage.ref(fStorage.getStorage(), yweetObj.fileUrl);
   const onDeleteClick = async () => {
     const ok = window.confirm("Are you sure to delete this yweet?");
     if (ok) {
       await fData.deleteDoc(YweetTextRef);
-      await fStorage.deleteObject(
-        fStorage.ref(fStorage.getStorage(), yweetObj.fileUrl)
-      );
+      if (yweetObj.fileUrl !== "") {
+        await fStorage.deleteObject(fileRef);
+      }
     }
   };
   const toggleEditing = () => setEditing((prev) => !prev);

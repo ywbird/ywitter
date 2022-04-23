@@ -9,19 +9,6 @@ const Home = ({ userObj }) => {
   const [file, setFile] = useState("");
   const fileInput = useRef();
   const getYweets = async () => {
-    setYweets([]);
-    const q = fData.query(fData.collection(fData.getFirestore(), "yweets"));
-    const querySnapshot = await fData.getDocs(q);
-    querySnapshot.forEach((doc) => {
-      const nweetObj = {
-        ...doc.data(),
-        id: doc.id,
-      };
-      setYweets((prev) => [nweetObj, ...prev]);
-    });
-  };
-  useEffect(() => {
-    getYweets();
     const q = fData.query(
       fData.collection(fData.getFirestore(), "yweets"),
       // where('text', '==', 'hehe') // where뿐만아니라 각종 조건 이 영역에 때려부우면 됨
@@ -40,10 +27,13 @@ const Home = ({ userObj }) => {
     return () => {
       unsubscribe();
     };
+  };
+  useEffect(() => {
+    getYweets();
   }, []);
   const onSubmit = async (event) => {
     event.preventDefault();
-    let fileUrl;
+    let fileUrl = "";
     if (file !== "") {
       const fileRef = fStorage.ref(
         fStorage.getStorage(),
@@ -59,6 +49,7 @@ const Home = ({ userObj }) => {
       comments: [],
       fileUrl,
     };
+    setYweet("");
     try {
       await fData.addDoc(
         fData.collection(fData.getFirestore(), "yweets"),

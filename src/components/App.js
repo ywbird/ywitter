@@ -10,18 +10,43 @@ function App() {
     fAuth.onAuthStateChanged(fAuth.getAuth(), (user) => {
       if (user) {
         setIsLoggedIn(true);
-        setUserObj(user);
+        setUserObj({
+          displayName: user.displayName,
+          uid: user.uid,
+          photoURL: user.photoURL,
+          updateProfile: (args) =>
+            fAuth.updateProfile(user, {
+              displayName: user.displayName,
+              photoURL: user.photoURL,
+            }),
+        });
       } else {
         setIsLoggedIn(false);
       }
       setInit(true);
-      console.log(user);
     });
   });
+  const refreshUser = () => {
+    const user = fAuth.getAuth().currentUser;
+    setUserObj({
+      displayName: user.displayName,
+      uid: user.uid,
+      photoURL: user.photoURL,
+      updateProfile: (args) =>
+        fAuth.updateProfile(user, {
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+        }),
+    });
+  };
   return (
     <>
       {init ? (
-        <AppRouter isLoggedIn={isLoggedIn} userObj={userObj} />
+        <AppRouter
+          refreshUser={refreshUser}
+          isLoggedIn={isLoggedIn}
+          userObj={userObj}
+        />
       ) : (
         "Initializing..."
       )}
