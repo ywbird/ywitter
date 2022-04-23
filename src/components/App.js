@@ -20,6 +20,7 @@ function App() {
               photoURL: user.photoURL,
             }),
         });
+        // console.log(user);
       } else {
         setIsLoggedIn(false);
       }
